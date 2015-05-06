@@ -1,0 +1,13 @@
+{% load static %}
+{% load socialaccount %}
+
+{% for provider in socialaccount.providers %}
+  	
+  	<li>
+	  <a title="{{provider.name}}" class="socialaccount_provider {{provider.id}}"
+	  	 href=""
+	  	 social-auth-btn="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}" social-auth-type="{{ process }}">{{provider.name}}</a>
+	</li>
+	
+{% endfor %}
+

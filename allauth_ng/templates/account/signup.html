@@ -1,0 +1,19 @@
+
+{% load url from future %}
+{% load i18n %}
+
+
+<h1>{% trans "Sign Up" %}</h1>
+
+<p>{% blocktrans %}Already have an account? Then please <a ui-sref="app.login">sign in</a>.{% endblocktrans %}</p>
+
+<form class="signup"
+	  name="{{ form.form_name }}"
+	  novalidate>
+  {{ form.as_div }}
+  <button class="btn btn-primary" 
+			ng-click='signupCtrl.submit({{ form.scope_prefix }}, {{ form.form_name }})'
+			ng-disabled="{{ form.form_name }}.$invalid">{% trans "Sign Up" %} &raquo;</button>
+</form>
+
+

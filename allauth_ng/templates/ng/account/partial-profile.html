@@ -1,0 +1,21 @@
+
+<div>
+	<h2>This is your profile</h2>
+	<p>(It does require authentication)</p>
+	
+	<div class="table-responsive">
+		<table class="table table-bordered table-striped">
+			<colgroup>
+				<col class="col-xs-1">
+				<col class="col-xs-5">
+			</colgroup>
+			<tbody>
+				{% verbatim %}
+				<tr ng-repeat="prop in ::profCtrl.userProps">
+				  	<td> {{::prop}} </td> <td> {{::profCtrl.user[prop]}} </td>
+				</tr>
+				{% endverbatim %}
+			</tbody>
+		</table>
+	</div>
+</div>

@@ -1,0 +1,42 @@
+
+{% load i18n %}
+{% load account %}
+{% load url from future %}
+
+
+<h1>{% trans "Sign In" %}</h1>
+
+{% if socialaccount.providers  %}
+<p>{% blocktrans with site.name as site_name %}Please sign in with one
+of your existing third party accounts. Or, <a ui-sref="app.register">sign up</a>
+for a {{site_name}} account and sign in below:{% endblocktrans %}</p>
+
+<div class="socialaccount_ballot">
+
+  <ul class="socialaccount_providers">
+    {% include "ng/socialaccount/snippets/provider_list.html" with process="login" %}
+  </ul>
+
+  <div class="login-or">{% trans 'or' %}</div>
+
+</div>
+
+{% else %}
+<p>{% blocktrans %}If you have not created an account yet, then please
+<a ui-sref="app.register">sign up</a> first.{% endblocktrans %}</p>
+{% endif %}
+
+<form class='login'
+	  name="{{ form.form_name }}"
+	  novalidate>
+	  
+	{{ form.as_div }}
+  
+	<button class="btn btn-primary" 
+			ng-click='signinCtrl.submit({{ form.scope_prefix }}, {{ form.form_name }})'
+			ng-disabled="{{ form.form_name }}.$invalid">{% trans "Sign In" %}</button>
+  		  
+	<a ui-sref="app.forgotten" class="btn btn-link btn-xs">{% trans "Forgot Password?" %}</a>
+	
+</form>
+

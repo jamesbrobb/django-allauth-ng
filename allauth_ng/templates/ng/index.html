@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block css %}
+<link href="{% static 'bower_components/angular-toastr/dist/angular-toastr.css' %}" rel="stylesheet">
+<link href="{% static 'bower_components/fontawesome/css/font-awesome.css' %}" rel="stylesheet">
+{% endblock css %}
+
+{% block open_body %}
+	<body ng-app="app"
+		  ng-controller="AppCtrl as appCtrl"
+		  ng-init="appCtrl.initialize({% if user.is_authenticated %}true{% else %}false{% endif %})"
+		  ng-strict-di>
+		
+		<div id="wrapper">
+	  
+		  	<div ui-view="header"></div>
+		  	
+		  	<div>
+				
+				<div id="main" class="container">
+			
+			      <div ui-view></div>
+				
+				</div>
+			
+			</div>
+	   
+		</div>
+	   
+		<div ui-view="footer"></div>
+		
+	
+{% endblock open_body %}
+
+{% block javascript %}
+   
+    <script src="{% static 'bower_components/angular/angular.js' %}"></script>
+    <script src="{% static 'bower_components/angular-ui-router/release/angular-ui-router.js' %}"></script>
+    <script src="{% static 'bower_components/angular-toastr/dist/angular-toastr.tpls.min.js' %}"></script>
+    
+    <script src="{% static 'js/libs/django-angular.js' %}"></script>
+    <script src="{% static 'js/libs/django-messages.js' %}"></script>
+   
+   	<script src="{% static 'build/js/build.js' %}"></script>
+	
+{% endblock javascript %}
+
+
