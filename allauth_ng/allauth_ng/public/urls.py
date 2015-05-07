@@ -9,5 +9,4 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name='public-index'),
-    #url(r'^profile/$', views.ProfileView.as_view(), name='public-profile'),
 )

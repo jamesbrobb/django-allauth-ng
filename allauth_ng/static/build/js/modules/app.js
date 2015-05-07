@@ -85,6 +85,7 @@ function configure404Redirect($urlRouterProvider) {
 
         /*
          * this occurs when you enter the app without a #
+         * so we guard against it causing a 404
          */
         if ($location.$$url !== '' &&
             $location.$$path !== '') {
@@ -279,17 +280,11 @@ function socialAuthServiceConfiguration(socialAuthServiceProvider) {
 socialAuthServiceConfiguration.$inject = ["socialAuthServiceProvider"];
 
 
-function authStateObserverConfiguration(userAuthEvents,
-    authStateObserverProvider) {
-
-    authStateObserverProvider.configureEvents(
-        userAuthEvents.USER_AUTHED,
-        userAuthEvents.USER_UNAUTHED
-    );
+function authStateObserverConfiguration(authStateObserverProvider) {
 
     authStateObserverProvider.responders = ['authStateObserverRouteStateProcessor'];
 }
-authStateObserverConfiguration.$inject = ["userAuthEvents", "authStateObserverProvider"];
+authStateObserverConfiguration.$inject = ["authStateObserverProvider"];
 
 /*
  * change styling to bootstrap
@@ -452,7 +447,7 @@ function stateAuthRequirementChecker(UserModel,
 
                 nextStateRedirectService.next = toState.name;
 
-                return _isRootState(fromState) ? appStates.HOME : fromState.name;
+                return appStates.LOGIN;
             }
         }
 
@@ -474,7 +469,11 @@ function stateAuthRequirementChecker(UserModel,
 stateAuthRequirementChecker.$inject = ["UserModel", "nextStateRedirectService", "routeStateUtils", "appStates"];
 
 
-function authStateObserverRouteStateProcessor($state, $urlRouter, routeStateUtils, appStates) {
+function authStateObserverRouteStateProcessor($state,
+    $urlRouter,
+    routeStateUtils,
+    appStates,
+    nextStateRedirectService) {
 
     return {
         processAuthed: processAuthed,
@@ -491,7 +490,7 @@ function authStateObserverRouteStateProcessor($state, $urlRouter, routeStateUtil
 
         } else if (_isAuthState()) {
 
-            $state.go(appStates.PROFILE);
+            $state.go(nextStateRedirectService.next || appStates.PROFILE);
         }
     }
 
@@ -525,7 +524,7 @@ function authStateObserverRouteStateProcessor($state, $urlRouter, routeStateUtil
         return current.data && current.data.requiresAuth
     }
 }
-authStateObserverRouteStateProcessor.$inject = ["$state", "$urlRouter", "routeStateUtils", "appStates"];
+authStateObserverRouteStateProcessor.$inject = ["$state", "$urlRouter", "routeStateUtils", "appStates", "nextStateRedirectService"];
 
 
 function observerInitialiser(authStateObserver, routeStateChangeObserver, messagesManager) {
@@ -566,9 +565,8 @@ function authResponderService($state,
 
         if (response.AUTHENTICATED) {
 
-            return userService
-                .get()
-                .then(nextStateRedirectService.go);
+            return userService.get();
+
         } else {
 
             $state.go(appStates.VERIFY_EMAIL);
@@ -579,9 +577,8 @@ function authResponderService($state,
 
         if (response.AUTHENTICATED) {
 
-            return userService
-                .get()
-                .then(nextStateRedirectService.go);
+            return userService.get();
+
         } else {
 
             $state.go(appStates.VERIFY_EMAIL);
@@ -595,7 +592,6 @@ function authResponderService($state,
 
     function logoutSuccess(response) {
         userService.clear();
-        //notificationManager.notify('info', authMessages.LOGGED_OUT)
     }
 
     function formError(error, form) {
@@ -623,40 +619,41 @@ function socialLoginResponder(userService,
     /* ====================== */
 
     function success(response) {
-        return userService.get()
-            .then(_notifySocialComplete)
-            .then(nextStateRedirectService.go);
-    };
+        return userService.get();
+    }
 
     function error(response) {
         notificationManager.notify('error', {
             title: 'Error',
             message: response
         });
-    };
+    }
 
     function denied(response) {
         notificationManager.notify('warning', {
             title: 'Access Denied',
             message: response
         });
-    };
+    }
 
     function closed(response) {
         notificationManager.notify('info', {
             title: 'Closed',
             message: response
         });
-    };
-
-    function _notifySocialComplete() {
-        //notificationManager.notify('info', socialMessages.SIGNUP_COMPLETE)
     }
 }
 socialLoginResponder.$inject = ["userService", "notificationManager", "nextStateRedirectService"];
 
 
-function userService($http, UserModel, apiEndpoints) {
+function userService($rootScope,
+    $http,
+    UserModel,
+    authStateObserver,
+    apiEndpoints,
+    userAuthSignal) {
+
+    _initialise();
 
     return {
         get: get,
@@ -669,24 +666,37 @@ function userService($http, UserModel, apiEndpoints) {
         return $http.get(apiEndpoints.BASE + apiEndpoints.USER)
             .then(_handleResponse)
             .catch(_handleError);
-    };
+    }
 
     function clear() {
         UserModel.clear();
-    };
+    }
+
+    function _initialise() {
+        userAuthSignal.onUserAuthenticated($rootScope, _handleAuthentication);
+        userAuthSignal.onUserUnauthenticated($rootScope, _handleUnauthentication);
+    }
 
     function _handleResponse(response) {
         UserModel.setUser(response.data);
         return response;
-    };
+    }
 
     function _handleError(error) {
         if (error.status === 403) {
             clear();
         }
-    };
+    }
+
+    function _handleAuthentication() {
+        authStateObserver.processAuthed();
+    }
+
+    function _handleUnauthentication() {
+        authStateObserver.processUnauthed();
+    }
 }
-userService.$inject = ["$http", "UserModel", "apiEndpoints"];
+userService.$inject = ["$rootScope", "$http", "UserModel", "authStateObserver", "apiEndpoints", "userAuthSignal"];
 
 
 function notificationManager(toastr) {

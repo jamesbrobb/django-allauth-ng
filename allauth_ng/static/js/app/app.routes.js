@@ -48,6 +48,7 @@ function configure404Redirect($urlRouterProvider) {
 
 		/*
 		 * this occurs when you enter the app without a #
+		 * so we guard against it causing a 404
 		 */
 		if( $location.$$url !== '' &&
 			$location.$$path !== '' ) {

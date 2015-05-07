@@ -259,7 +259,7 @@ function routeStateChangeObserver() {
 }
 
 
-function nextStateRedirectService($state) {
+function nextStateRedirectService() {
 	
 	var _next;
 	
@@ -267,24 +267,15 @@ function nextStateRedirectService($state) {
 		set next(value) {
 			_next = value;
 		},
-		processStateChange: processStateChange,
-		go: go
+		get next() {
+			return _next;
+		},
+		processStateChange: processStateChange
 	}
 	
 	/* ---------------- */
 	
 	function processStateChange(toState, toParams, fromState, fromParams) {
-		_clear();
-	}
-	
-	function go() {
-		if(_next && $state.current.name !== _next) {
-			$state.go(_next);
-		}
-		_clear();
-	}
-	
-	function _clear() {
 		_next = null;
 	}
 }

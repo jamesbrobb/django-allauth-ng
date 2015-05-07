@@ -12,16 +12,10 @@ angular
 	
 function authStateObserver() {
 	
-	var _authedEvent,
-		_unauthedEvent,
-		_responders;
+	var _responders;
 	
 	return {
-		/**
-		 * @param authedEvent
-		 * @param unauthedEvent
-		 */
-		configureEvents: configureEvents,
+
 		/**
 		 * @param value A string or array of strings representing the names of services to process the events
 		 * 
@@ -39,20 +33,14 @@ function authStateObserver() {
 		$get: $get
 	}
 	
-	
 	/* ----------------------- */
-	
-	
-	function configureEvents(authedEvent, unauthedEvent) {
-		
-		_authedEvent = authedEvent;
-		_unauthedEvent = unauthedEvent;
-	}
 	
 	function $get(dependencyResolver, $rootScope) {
 		
 		return {
-			initialise: initialise
+			initialise: initialise,
+			processAuthed: processAuthed,
+			processUnauthed: processUnauthed
 		}
 		
 		/* --------------------- */
@@ -60,16 +48,13 @@ function authStateObserver() {
 		function initialise() {
 			
 			_configureResponders();
-			
-			$rootScope.$on(_authedEvent, _handleAuthedEvent);
-			$rootScope.$on(_unauthedEvent, _handleUnauthedEvent);
 		}
 		
-		function _handleAuthedEvent() {
+		function processAuthed() {
 			_processResponders('processAuthed');
 		}
 		
-		function _handleUnauthedEvent() {
+		function processUnauthed() {
 			_processResponders('processUnAuthed');
 		}
 		

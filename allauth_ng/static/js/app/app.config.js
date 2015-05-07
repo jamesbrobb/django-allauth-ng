@@ -45,13 +45,7 @@ function socialAuthServiceConfiguration(socialAuthServiceProvider) {
 }
 
 
-function authStateObserverConfiguration(userAuthEvents,
-										authStateObserverProvider) {
-	
-	authStateObserverProvider.configureEvents(
-			userAuthEvents.USER_AUTHED,
-			userAuthEvents.USER_UNAUTHED
-	);
+function authStateObserverConfiguration(authStateObserverProvider) {
 	
 	authStateObserverProvider.responders = ['authStateObserverRouteStateProcessor'];
 }

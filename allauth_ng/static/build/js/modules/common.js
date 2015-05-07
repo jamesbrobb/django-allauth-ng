@@ -151,17 +151,11 @@ angular
 
 function authStateObserver() {
 
-    var _authedEvent,
-        _unauthedEvent,
-        _responders;
+    var _responders;
 
     $get.$inject = ["dependencyResolver", "$rootScope"];
     return {
-        /**
-         * @param authedEvent
-         * @param unauthedEvent
-         */
-        configureEvents: configureEvents,
+
         /**
          * @param value A string or array of strings representing the names of services to process the events
          *
@@ -179,20 +173,14 @@ function authStateObserver() {
         $get: $get
     }
 
-
     /* ----------------------- */
-
-
-    function configureEvents(authedEvent, unauthedEvent) {
-
-        _authedEvent = authedEvent;
-        _unauthedEvent = unauthedEvent;
-    }
 
     function $get(dependencyResolver, $rootScope) {
 
         return {
-            initialise: initialise
+            initialise: initialise,
+            processAuthed: processAuthed,
+            processUnauthed: processUnauthed
         }
 
         /* --------------------- */
@@ -200,16 +188,13 @@ function authStateObserver() {
         function initialise() {
 
             _configureResponders();
-
-            $rootScope.$on(_authedEvent, _handleAuthedEvent);
-            $rootScope.$on(_unauthedEvent, _handleUnauthedEvent);
         }
 
-        function _handleAuthedEvent() {
+        function processAuthed() {
             _processResponders('processAuthed');
         }
 
-        function _handleUnauthedEvent() {
+        function processUnauthed() {
             _processResponders('processUnAuthed');
         }
 
@@ -643,7 +628,7 @@ function routeStateChangeObserver() {
 }
 
 
-function nextStateRedirectService($state) {
+function nextStateRedirectService() {
 
     var _next;
 
@@ -651,28 +636,18 @@ function nextStateRedirectService($state) {
         set next(value) {
             _next = value;
         },
-        processStateChange: processStateChange,
-        go: go
+        get next() {
+            return _next;
+        },
+        processStateChange: processStateChange
     }
 
     /* ---------------- */
 
     function processStateChange(toState, toParams, fromState, fromParams) {
-        _clear();
-    }
-
-    function go() {
-        if (_next && $state.current.name !== _next) {
-            $state.go(_next);
-        }
-        _clear();
-    }
-
-    function _clear() {
         _next = null;
     }
 }
-nextStateRedirectService.$inject = ["$state"];
 
 angular
     .module('app.common.http', [
